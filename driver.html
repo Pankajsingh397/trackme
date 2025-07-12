@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JBD Driver Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js"></script>
+</head>
+<body>
+  <h2>JBD Driver Live Tracker</h2>
+  <p>Status: <span id="status">Waiting...</span></p>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoI2x-VEYGb1JS5ipwDgpivbr6VUh52C4",
+      authDomain: "jbd-tracker.firebaseapp.com",
+      projectId: "jbd-tracker",
+      storageBucket: "jbd-tracker.firebasestorage.app",
+      messagingSenderId: "699216243069",
+      appId: "1:699216243069:web:7f5d26f1df4e3360974414",
+      measurementId: "G-MG6ZE70498",
+      databaseURL: "https://jbd-tracker-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const vehicleId = prompt("Enter vehicle ID or name:");
+
+    function updateLocation(position) {
+      const { latitude, longitude } = position.coords;
+      db.ref("vehicles/" + vehicleId).set({
+        lat: latitude,
+        lng: longitude,
+        time: new Date().toLocaleString()
+      });
+      document.getElementById('status').innerText = `Location sent: (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+    }
+
+    function handleError(error) {
+      document.getElementById('status').innerText = "Error getting location.";
+      console.error(error);
+    }
+
+    if (navigator.geolocation) {
+      document.getElementById('status').innerText = "Tracking...";
+      setInterval(() => {
+        navigator.geolocation.getCurrentPosition(updateLocation, handleError);
+      }, 5000);
+    } else {
+      document.getElementById('status').innerText = "Geolocation not supported.";
+    }
+  </script>
+</body>
+</html>

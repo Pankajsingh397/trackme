@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JBD Live Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #map { height: 100vh; width: 100%; margin: 0; padding: 0; }
+    body { margin: 0; padding: 0; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-database.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAoI2x-VEYGb1JS5ipwDgpivbr6VUh52C4",
+      authDomain: "jbd-tracker.firebaseapp.com",
+      projectId: "jbd-tracker",
+      storageBucket: "jbd-tracker.firebasestorage.app",
+      messagingSenderId: "699216243069",
+      appId: "1:699216243069:web:7f5d26f1df4e3360974414",
+      measurementId: "G-MG6ZE70498",
+      databaseURL: "https://jbd-tracker-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const map = L.map('map').setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = {};
+
+    db.ref("vehicles").on("value", (snapshot) => {
+      const data = snapshot.val();
+      for (const id in data) {
+        const { lat, lng, time } = data[id];
+        const popup = `${id}<br>${lat.toFixed(4)}, ${lng.toFixed(4)}<br>${time}`;
+        
+        if (markers[id]) {
+          markers[id].setLatLng([lat, lng]).setPopupContent(popup);
+        } else {
+          markers[id] = L.marker([lat, lng]).addTo(map).bindPopup(popup);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
